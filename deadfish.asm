@@ -3,7 +3,7 @@ MODEL SMALL
 STACK 100h
 
 DATASEG
-
+    EOF equ 0
     ZERO equ 0
     MEMORY_SIZE equ 1000
     INITIAL_MEMORY_VALUE equ 0
@@ -11,9 +11,15 @@ DATASEG
     COMMANDS_SIZE equ 1000
     INITIAL_COMMAND_SIZE equ 0
 
-    file_name db 'code.txt', 0
+    FILE_PATH_SIZE equ 255
+
     file_handle dw ?
     error_message db 'Error', 10, 13, '$'
+
+    file_path_input_message db 'Enter file path: ', 10, 13, '$'
+    code_file_path db   FILE_PATH_SIZE ; number of characters + 1
+                   db   ? ; number of characters entered by the user
+                   db   FILE_PATH_SIZE dup (ZERO) ; characters eneterd by the user
 
     commands_length dw 0
 
@@ -134,9 +140,36 @@ main:
     mov ds, ax
     xor ax, ax
 
+    mov dx, offset file_path_input_message
+    mov ah, 09h
+    int 21h
+
+; get file path of the code file
+    mov dx, offset code_file_path
+    mov ah, 0Ah
+    int 21h
+
+; replace the last character with a EOF (0)
+    mov si, offset code_file_path + 1
+    mov cl, [byte ptr si]
+    xor ch, ch
+    inc cx
+    add si, cx
+    mov al, EOF
+    mov [byte ptr si], al
+
+    mov dl, 10
+    mov ah, 02h
+    int 21h
+
+    mov dl, 13
+    mov ah, 02h
+    int 21h
+
+
     push offset error_message
     push offset file_handle
-    push offset file_name
+    push offset code_file_path + 2
     call open_file
 
     push offset commands_length
