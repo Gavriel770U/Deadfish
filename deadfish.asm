@@ -5,11 +5,9 @@ STACK 100h
 DATASEG
     EOF equ 0
     ZERO equ 0
-    MEMORY_SIZE equ 1000
-    INITIAL_MEMORY_VALUE equ 0
 
     COMMANDS_SIZE equ 1000
-    INITIAL_COMMAND_SIZE equ 0
+    INITIAL_COMMAND_SIZE equ ZERO
 
     FILE_PATH_SIZE equ 255
 
@@ -21,9 +19,7 @@ DATASEG
                    db   ? ; number of characters entered by the user
                    db   FILE_PATH_SIZE dup (ZERO) ; characters eneterd by the user
 
-    commands_length dw 0
-
-    memory db MEMORY_SIZE dup(INITIAL_MEMORY_VALUE)
+    commands_length dw ZERO
 
     commands db COMMANDS_SIZE dup(INITIAL_COMMAND_SIZE)
 
@@ -141,6 +137,7 @@ proc interpret
     ; [bp+6] commands_length [value]
 
     ; si will be command pointer
+    ; ax will be the accumulator
 
     push bp
     mov bp, sp
@@ -162,11 +159,20 @@ proc interpret
     mov cx, [bp+6]
 
     interpreter_loop:
-        ; TODO
+        mov cl, [byte ptr si]
+        cmp cl, 'i'
+        je inc_command
+        jmp finish_interpreter_iteration
+
+        inc_command:
+            inc ax
+            jmp finish_interpreter_iteration
+            
+        finish_interpreter_iteration:
+            inc si
     loop interpreter_loop
 
     end_interpretation:
-
     pop di
     pop si
     pop dx
@@ -230,10 +236,14 @@ main:
     mov [byte ptr si+bx], al
 
     ; print code file contents
-    xor al, al
-    mov dx, offset commands
-    mov ah, 9h
-    int 21h
+    ;xor al, al
+    ;mov dx, offset commands
+    ;mov ah, 9h
+    ;int 21h
+
+    push [word ptr commands_length]
+    push offset commands
+    call interpret
 
     jmp exit
 
