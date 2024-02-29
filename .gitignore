@@ -1,0 +1,11 @@
+.history
+.history/
+.history/*
+
+.vscode
+.vscode/
+.vscode/*
+
+.dist
+.dist/
+.dist/*
