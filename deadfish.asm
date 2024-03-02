@@ -159,8 +159,8 @@ proc interpret
     mov cx, [bp+6]
 
     interpreter_loop:
-        mov cl, [byte ptr si]
-        cmp cl, 'i'
+        mov dl, [byte ptr si]
+        cmp dl, 'i'
         je inc_command
         jmp finish_interpreter_iteration
 
