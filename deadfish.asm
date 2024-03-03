@@ -133,11 +133,50 @@ endp read_file
 
 ;----------------------------------------------------------------
 proc print_number
+    ; [bp+4] number to print [value]
+
     push bp
     mov bp, sp
 
+    push ax
+    push bx
+    push cx
+    push dx
+
+    mov ax, [bp+4]
+    mov bx, 10
+    xor cx, cx
+
+    print_number_push_loop:
+        xor dx, dx
+        div bx
+        push dx
+        inc cl
+        cmp ax, ZERO
+        jne print_number_push_loop
+    print_number_pop_loop:
+        pop dx
+        add dl, 30h
+        mov ah, 02h
+        int 21h
+        dec cl    
+        cmp cl, ZERO
+        jne print_number_pop_loop
+
+    mov dl, 10
+    mov ah, 02h
+    int 21h
+
+    mov dl, 13
+    mov ah, 02h
+    int 21h
+
+    pop dx
+    pop cx
+    pop bx
+    pop ax
     pop bp
-    ret
+    ret 2
 endp print_number
 ;----------------------------------------------------------------
 
@@ -170,6 +209,7 @@ proc interpret
     mov cx, [bp+6]
 
     interpreter_loop:
+        xor dx, dx
         mov dl, [byte ptr si]
         cmp dl, 'i'
         je inc_command
@@ -194,7 +234,8 @@ proc interpret
             xor dx, dx
             jmp finish_interpreter_iteration
         output_numeric_command:
-            ; TODO: output ax as number
+            push ax
+            call print_number
         finish_interpreter_iteration:
             inc si
     loop interpreter_loop
