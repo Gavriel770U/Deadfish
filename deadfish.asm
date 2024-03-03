@@ -136,8 +136,8 @@ proc interpret
     ; [bp+4] offset commands
     ; [bp+6] commands_length [value]
 
-    ; si will be command pointer
-    ; ax will be the accumulator
+    ; si serves as command pointer
+    ; ax serves as the accumulator
 
     push bp
     mov bp, sp
@@ -162,12 +162,25 @@ proc interpret
         mov dl, [byte ptr si]
         cmp dl, 'i'
         je inc_command
+        cmp dl, 'd'
+        je dec_command
+        cmp dl, 's'
+        je square_command
+        cmp dl, 'o'
+        je output_numeric_command
         jmp finish_interpreter_iteration
 
         inc_command:
             inc ax
             jmp finish_interpreter_iteration
-            
+        dec_command:
+            dec ax
+            jmp finish_interpreter_iteration
+        square_command:
+            ; TODO: square ax
+            jmp finish_interpreter_iteration
+        output_numeric_command:
+            ; TODO: output ax as number
         finish_interpreter_iteration:
             inc si
     loop interpreter_loop
@@ -197,7 +210,7 @@ main:
     mov ah, 0Ah
     int 21h
 
-; replace the last character with a EOF (0)
+; replace the last character with an EOF (0)
     mov si, offset code_file_path + 1
     mov cl, [byte ptr si]
     xor ch, ch
