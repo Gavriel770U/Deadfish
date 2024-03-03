@@ -132,6 +132,17 @@ endp read_file
 ;----------------------------------------------------------------
 
 ;----------------------------------------------------------------
+proc print_number
+    push bp
+    mov bp, sp
+
+    pop bp
+    ret
+endp print_number
+;----------------------------------------------------------------
+
+
+;----------------------------------------------------------------
 proc interpret
     ; [bp+4] offset commands
     ; [bp+6] commands_length [value]
@@ -177,7 +188,10 @@ proc interpret
             dec ax
             jmp finish_interpreter_iteration
         square_command:
-            ; TODO: square ax
+            mov bx, ax
+            xor dx, dx
+            mul bx
+            xor dx, dx
             jmp finish_interpreter_iteration
         output_numeric_command:
             ; TODO: output ax as number
