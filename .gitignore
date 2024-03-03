@@ -9,3 +9,8 @@
 .dist
 .dist/
 .dist/*
+
+# Files that will be built during compilation (unique for each run):
+.MAP
+.OBJ
+.EXE
