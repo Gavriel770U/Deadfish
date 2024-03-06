@@ -42,7 +42,7 @@ DATASEG
 
 
     action_input_message db "[I]nterpret | [C]ompile -> ", '$'
-    compilation_optimization_option db "Insert optimization level [1, 2]: ", '$'
+    compilation_optimization_option db "Insert optimization level [1] | [2] -> ", '$'
 
     commands_length dw ZERO
 
@@ -270,7 +270,13 @@ endp interpret
 
 
 ;----------------------------------------------------------------
+proc compile_o1
+    push bp 
+    mov bp, sp
 
+    pop bp
+    ret
+endp compile_o1
 ;----------------------------------------------------------------
 
 main:
@@ -356,6 +362,8 @@ main_call_compile:
 
     mov ah, 01h
     int 21h
+
+    call compile_o1
 
     print_endline
 
