@@ -284,10 +284,10 @@ main:
     print_endline
 
     cmp al, 'I'
-    je main_call_intepret
+    je main_call_interpret
     jmp exit
 
-main_call_intepret:
+main_call_interpret:
     mov dx, offset file_path_input_message
     mov ah, 09h
     int 21h
