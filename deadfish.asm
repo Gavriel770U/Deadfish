@@ -1,5 +1,26 @@
 IDEAL
 MODEL SMALL
+
+MACRO print_endline
+    push ax
+    push bx
+    push cx
+    push dx
+
+    mov dl, 10
+    mov ah, 02h
+    int 21h
+
+    mov dl, 13
+    mov ah, 02h
+    int 21h
+
+    pop dx
+    pop cx
+    pop bx
+    pop ax
+ENDM
+
 STACK 100h
 
 DATASEG
@@ -18,6 +39,9 @@ DATASEG
     code_file_path db   FILE_PATH_SIZE ; number of characters + 1
                    db   ? ; number of characters entered by the user
                    db   FILE_PATH_SIZE dup (ZERO) ; characters eneterd by the user
+
+
+    action_input_message db "[I]nterpret | [C]ompile -> ", '$'
 
     commands_length dw ZERO
 
@@ -255,6 +279,12 @@ main:
     mov ax, @data
     mov ds, ax
     xor ax, ax
+
+    mov dx, offset action_input_message
+    mov ah, 09h
+    int 21h
+
+    print_endline
 
     mov dx, offset file_path_input_message
     mov ah, 09h
