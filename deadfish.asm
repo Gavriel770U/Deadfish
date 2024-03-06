@@ -27,6 +27,8 @@ DATASEG
     EOF equ 0
     ZERO equ 0
 
+    READONLY_FILE equ 0
+
     FILE_READ_MODE equ 0
     FILE_WRITE_MODE equ 1
     FILE_READ_WRITE_MODE equ 2
@@ -100,13 +102,51 @@ open_error:
     pop bx
     pop ax
     pop bp
-    ret 6
+    ret 8
 endp open_file
 ;----------------------------------------------------------------
 
 ;----------------------------------------------------------------
 proc create_file
+    ; [bp+4] offset file_name
+    ; [bp+6] offset file_handle
+    ; [bp+8] offset error_message
+    ; [bp+10] file attributes [value]
 
+    push bp
+    mov bp, sp
+    push ax
+    push bx
+    push cx
+    push dx
+
+    mov ax, 3Ch
+    mov dx, [bp+4]
+    mov bx, [bp+6]
+    mov cx, [bp+10]
+    int 21h
+    jc create_file_error
+
+    mov bx, [bp+6]
+    mov [bx], ax
+    pop dx
+    pop cx
+    pop bx
+    pop ax
+    pop bp
+    ret 8
+
+create_file_error:
+    mov dx, [bp+8]
+    mov ah, 09h
+    int 21h
+    
+    pop ax
+    pop bx
+    pop cx
+    pop dx
+    pop bp
+    ret 8
 endp create_file
 ;----------------------------------------------------------------
 
@@ -407,11 +447,11 @@ main_call_compile:
 
     print_endline
 
-    push FILE_WRITE_MODE
+    push READONLY_FILE
     push offset error_message
     push offset compiled_file_handle
     push offset compiled_file_path + 2
-    call open_file
+    call create_file
         
     push offset compiled_file_handle
     call close_file
