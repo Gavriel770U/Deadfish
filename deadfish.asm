@@ -42,6 +42,7 @@ DATASEG
 
 
     action_input_message db "[I]nterpret | [C]ompile -> ", '$'
+    compilation_optimization_option db "Insert optimization level [1, 2]: ", '$'
 
     commands_length dw ZERO
 
@@ -269,6 +270,7 @@ proc interpret
     ret 4
 endp interpret
 ;----------------------------------------------------------------
+
 main:
     mov ax, @data
     mov ds, ax
@@ -284,8 +286,14 @@ main:
     print_endline
 
     cmp al, 'I'
-    je main_call_interpret
-    jmp exit
+    jne skip_call_interpret
+    call far cs:main_call_interpret
+skip_call_interpret:
+    cmp al, 'C'
+    jne skip_call_compile
+    call far cs:main_call_compile
+skip_call_compile:
+    call far cs:exit
 
 main_call_interpret:
     mov dx, offset file_path_input_message
@@ -337,6 +345,17 @@ main_call_interpret:
     push [word ptr commands_length]
     push offset commands
     call interpret
+    jmp exit
+
+main_call_compile:
+    mov dx, offset compilation_optimization_option
+    mov ah, 09h
+    int 21h
+
+    mov ah, 01h
+    int 21h
+
+    print_endline
 
     jmp exit
 
