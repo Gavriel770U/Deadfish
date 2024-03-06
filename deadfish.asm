@@ -278,8 +278,16 @@ main:
     mov ah, 09h
     int 21h
 
+    mov ah, 01h
+    int 21h
+
     print_endline
 
+    cmp al, 'I'
+    je main_call_intepret
+    jmp exit
+
+main_call_intepret:
     mov dx, offset file_path_input_message
     mov ah, 09h
     int 21h
