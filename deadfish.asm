@@ -27,18 +27,28 @@ DATASEG
     EOF equ 0
     ZERO equ 0
 
+    FILE_READ_MODE equ 0
+    FILE_WRITE_MODE equ 1
+    FILE_READ_WRITE_MODE equ 2
+
     COMMANDS_SIZE equ 1000
     INITIAL_COMMAND_SIZE equ ZERO
 
     FILE_PATH_SIZE equ 255
 
     file_handle dw ?
+    compiled_file_handle dw ?
     error_message db 'Error', 10, 13, '$'
 
     file_path_input_message db 'Enter file path: ', 10, 13, '$'
     code_file_path db   FILE_PATH_SIZE ; number of characters + 1
                    db   ? ; number of characters entered by the user
-                   db   FILE_PATH_SIZE dup (ZERO) ; characters eneterd by the user
+                   db   FILE_PATH_SIZE dup (ZERO) ; characters entered by the user
+
+    compiled_path_input_message db 'Enter path for the compiled file: ', 10, 13, '$'
+    compiled_file_path db   FILE_PATH_SIZE ; number of characters + 1
+                       db   ? ; number of characters entered by the user
+                       db   FILE_PATH_SIZE dup (ZERO) ; characters entered by the user                 
 
 
     action_input_message db "[I]nterpret | [C]ompile -> ", '$'
@@ -55,6 +65,7 @@ proc open_file
     ; [bp+4] offset file_name
     ; [bp+6] offset file_handle
     ; [bp+8] offset error_message
+    ; [bp+10] mode [value]
 
     push bp
     mov bp, sp
@@ -67,7 +78,7 @@ proc open_file
     xor dx, dx
 
     mov ah, 3Dh
-    xor al, al ; set read-only mode
+    mov al, [byte ptr bp+10]
     mov dx, [bp+4]
     int 21h
     jc open_error
@@ -78,7 +89,7 @@ proc open_file
     pop bx
     pop ax
     pop bp
-    ret 6
+    ret 8
 
 open_error:
     mov dx, [bp+8]
@@ -91,6 +102,12 @@ open_error:
     pop bp
     ret 6
 endp open_file
+;----------------------------------------------------------------
+
+;----------------------------------------------------------------
+proc create_file
+
+endp create_file
 ;----------------------------------------------------------------
 
 ;----------------------------------------------------------------
@@ -154,6 +171,10 @@ proc read_file
     pop bp
     ret 6
 endp read_file
+;----------------------------------------------------------------
+
+;----------------------------------------------------------------
+
 ;----------------------------------------------------------------
 
 ;----------------------------------------------------------------
@@ -324,6 +345,7 @@ main_call_interpret:
 
     print_endline
 
+    push FILE_READ_MODE
     push offset error_message
     push offset file_handle
     push offset code_file_path + 2
@@ -362,6 +384,37 @@ main_call_compile:
 
     mov ah, 01h
     int 21h
+
+    print_endline
+
+    mov dx, offset compiled_path_input_message
+    mov ah, 09h
+    int 21h
+
+    ; get file path of the code file
+    mov dx, offset compiled_file_path
+    mov ah, 0Ah
+    int 21h
+
+; replace the last character with an EOF (0)
+    mov si, offset compiled_file_path + 1
+    mov cl, [byte ptr si]
+    xor ch, ch
+    inc cx
+    add si, cx
+    mov al, EOF
+    mov [byte ptr si], al
+
+    print_endline
+
+    push FILE_WRITE_MODE
+    push offset error_message
+    push offset compiled_file_handle
+    push offset compiled_file_path + 2
+    call open_file
+        
+    push offset compiled_file_handle
+    call close_file
 
     call compile_o1
 
