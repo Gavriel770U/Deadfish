@@ -215,14 +215,12 @@ proc interpret
     push cx
     push dx
     push si
-    push di
 
     xor ax, ax
     xor bx, bx
     xor cx, cx
     xor dx, dx
     xor si, si
-    xor di, di
 
     mov si, [bp+4]
     mov cx, [bp+6]
@@ -260,7 +258,6 @@ proc interpret
     loop interpreter_loop
 
     end_interpretation:
-    pop di
     pop si
     pop dx
     pop cx
@@ -269,6 +266,11 @@ proc interpret
     pop bp
     ret 4
 endp interpret
+;----------------------------------------------------------------
+
+
+;----------------------------------------------------------------
+
 ;----------------------------------------------------------------
 
 main:
