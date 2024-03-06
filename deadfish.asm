@@ -120,15 +120,16 @@ proc create_file
     push cx
     push dx
 
-    mov ax, 3Ch
+    xor al, al
+    mov ah, 3Ch
     mov dx, [bp+4]
     mov bx, [bp+6]
     mov cx, [bp+10]
     int 21h
     jc create_file_error
-
     mov bx, [bp+6]
     mov [bx], ax
+
     pop dx
     pop cx
     pop bx
@@ -432,6 +433,7 @@ main_call_compile:
     int 21h
 
     ; get file path of the code file
+    xor al, al
     mov dx, offset compiled_file_path
     mov ah, 0Ah
     int 21h
