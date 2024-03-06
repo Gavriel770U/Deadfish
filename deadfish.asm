@@ -187,13 +187,7 @@ proc print_number
         cmp cl, ZERO
         jne print_number_pop_loop
 
-    mov dl, 10
-    mov ah, 02h
-    int 21h
-
-    mov dl, 13
-    mov ah, 02h
-    int 21h
+    print_endline
 
     pop dx
     pop cx
@@ -304,14 +298,7 @@ main:
     mov al, EOF
     mov [byte ptr si], al
 
-    mov dl, 10
-    mov ah, 02h
-    int 21h
-
-    mov dl, 13
-    mov ah, 02h
-    int 21h
-
+    print_endline
 
     push offset error_message
     push offset file_handle
