@@ -41,10 +41,19 @@ DATASEG
     INITIAL_ASM_CODE    db  "IDEAL", 10            ; 6  characters
                         db  "MODEL SMALL", 10      ; 12 characters
                         db  "STACK 100h", 10, 13   ; 12 characters
-                        db  "DATASEG", 10, 13      ; 9 characters
-                        db  "CODESEG", 10, 13      ; 9 characters
+                        db  "DATASEG", 10, 13      ; 9  characters
+                        db  "CODESEG", 10, 13      ; 9  characters
+                        db  "main:", 10            ; 6  characters 
 
-    INITIAL_ASM_CODE_SIZE dw 6+12+12+9+9
+    INITIAL_ASM_CODE_SIZE dw 6+12+12+9+9+6
+
+    FINAL_ASM_CODE      db 10, 13, "exit:", 10     ; 6  characters
+                        db "    mov ax, 4c00h", 10 ; 18 characters
+                        db "    int 21h", 10       ; 12 characters
+                        db 10, 13, "END main"      ; 9 characters
+                        
+    FINAL_ASM_CODE_SIZE dw 6+18+12+9
+
 
     file_handle dw ?
     compiled_file_handle dw ?
