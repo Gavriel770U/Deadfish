@@ -38,7 +38,11 @@ DATASEG
 
     FILE_PATH_SIZE equ 255
 
-    INITIAL_ASM_CODE db "IDEAL", 10, 13
+    INITIAL_ASM_CODE    db  "IDEAL", 10        ; 6  characters
+                        db  "MODEL SMALL", 10  ; 12 characters
+                        db  "STACK 100h", 10   ; 11 characters
+
+    INITIAL_ASM_CODE_SIZE dw 6+12+11
 
     file_handle dw ?
     compiled_file_handle dw ?
@@ -493,7 +497,7 @@ main_call_compile:
     push offset compiled_file_path + 2
     call open_file
 
-    push 7
+    push INITIAL_ASM_CODE_SIZE
     push offset INITIAL_ASM_CODE
     push offset compiled_file_handle
     call write_file
