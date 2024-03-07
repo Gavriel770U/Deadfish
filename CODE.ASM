@@ -4,3 +4,9 @@ STACK 100h
 DATASEG
 CODESEG
 main:
+
+exit:
+    mov ax, 4c00h
+    int 21h
+
+END main

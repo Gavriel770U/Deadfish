@@ -47,12 +47,12 @@ DATASEG
 
     INITIAL_ASM_CODE_SIZE dw 6+12+12+9+9+6
 
-    FINAL_ASM_CODE      db 10, 13, "exit:", 10     ; 6  characters
+    FINAL_ASM_CODE      db 10, 13, "exit:", 10     ; 8  characters
                         db "    mov ax, 4c00h", 10 ; 18 characters
                         db "    int 21h", 10       ; 12 characters
-                        db 10, 13, "END main"      ; 9 characters
-                        
-    FINAL_ASM_CODE_SIZE dw 6+18+12+9
+                        db 10, 13, "END main"      ; 10 characters
+
+    FINAL_ASM_CODE_SIZE dw 8+18+12+10
 
 
     file_handle dw ?
@@ -510,6 +510,11 @@ main_call_compile:
 
     push [INITIAL_ASM_CODE_SIZE]
     push offset INITIAL_ASM_CODE
+    push offset compiled_file_handle
+    call write_file
+
+    push [FINAL_ASM_CODE_SIZE]
+    push offset FINAL_ASM_CODE
     push offset compiled_file_handle
     call write_file
 
