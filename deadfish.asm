@@ -27,26 +27,46 @@ DATASEG
     EOF equ 0
     ZERO equ 0
 
+    READONLY_FILE equ 0
+
+    FILE_READ_MODE equ 0
+    FILE_WRITE_MODE equ 1
+    FILE_READ_WRITE_MODE equ 2
+
     COMMANDS_SIZE equ 1000
     INITIAL_COMMAND_SIZE equ ZERO
 
     FILE_PATH_SIZE equ 255
 
+    INITIAL_ASM_CODE    db  "IDEAL", 10            ; 6  characters
+                        db  "MODEL SMALL", 10      ; 12 characters
+                        db  "STACK 100h", 10, 13   ; 12 characters
+                        db  "DATASEG", 10, 13      ; 9 characters
+                        db  "CODESEG", 10, 13      ; 9 characters
+
+    INITIAL_ASM_CODE_SIZE dw 6+12+12+9+9
+
     file_handle dw ?
+    compiled_file_handle dw ?
     error_message db 'Error', 10, 13, '$'
 
     file_path_input_message db 'Enter file path: ', 10, 13, '$'
     code_file_path db   FILE_PATH_SIZE ; number of characters + 1
                    db   ? ; number of characters entered by the user
-                   db   FILE_PATH_SIZE dup (ZERO) ; characters eneterd by the user
+                   db   FILE_PATH_SIZE dup (ZERO) ; characters entered by the user
+
+    compiled_path_input_message db 'Enter path for the compiled file: ', 10, 13, '$'
+    compiled_file_path db   FILE_PATH_SIZE ; number of characters + 1
+                       db   ? ; number of characters entered by the user
+                       db   FILE_PATH_SIZE dup (ZERO) ; characters entered by the user                 
 
 
     action_input_message db "[I]nterpret | [C]ompile -> ", '$'
-    compilation_optimization_option db "Insert optimization level [1, 2]: ", '$'
+    compilation_optimization_option db "Insert optimization level [1] | [2] -> ", '$'
 
     commands_length dw ZERO
 
-    commands db COMMANDS_SIZE dup(INITIAL_COMMAND_SIZE)
+    commands db COMMANDS_SIZE dup (INITIAL_COMMAND_SIZE)
 
 CODESEG
 
@@ -55,6 +75,7 @@ proc open_file
     ; [bp+4] offset file_name
     ; [bp+6] offset file_handle
     ; [bp+8] offset error_message
+    ; [bp+10] mode [value]
 
     push bp
     mov bp, sp
@@ -67,7 +88,7 @@ proc open_file
     xor dx, dx
 
     mov ah, 3Dh
-    xor al, al ; set read-only mode
+    mov al, [byte ptr bp+10]
     mov dx, [bp+4]
     int 21h
     jc open_error
@@ -78,7 +99,7 @@ proc open_file
     pop bx
     pop ax
     pop bp
-    ret 6
+    ret 8
 
 open_error:
     mov dx, [bp+8]
@@ -89,8 +110,53 @@ open_error:
     pop bx
     pop ax
     pop bp
-    ret 6
+    ret 8
 endp open_file
+;----------------------------------------------------------------
+
+;----------------------------------------------------------------
+proc create_file
+    ; [bp+4] offset file_name
+    ; [bp+6] offset file_handle
+    ; [bp+8] offset error_message
+    ; [bp+10] file attributes [value]
+
+    push bp
+    mov bp, sp
+    push ax
+    push bx
+    push cx
+    push dx
+
+    xor al, al
+    mov ah, 3Ch
+    mov dx, [bp+4]
+    mov bx, [bp+6]
+    mov cx, [bp+10]
+    int 21h
+    jc create_file_error
+    mov bx, [bp+6]
+    mov [bx], ax
+
+    pop dx
+    pop cx
+    pop bx
+    pop ax
+    pop bp
+    ret 8
+
+create_file_error:
+    mov dx, [bp+8]
+    mov ah, 09h
+    int 21h
+    
+    pop dx
+    pop bx
+    pop cx
+    pop ax
+    pop bp
+    ret 8
+endp create_file
 ;----------------------------------------------------------------
 
 ;----------------------------------------------------------------
@@ -157,6 +223,37 @@ endp read_file
 ;----------------------------------------------------------------
 
 ;----------------------------------------------------------------
+proc write_file
+    ; [bp+4] offset file_handle
+    ; [bp+6] offset buffer
+    ; [bp+8] buffer length [value]
+
+    push bp
+    mov bp, sp
+
+    push ax
+    push bx
+    push cx
+    push dx
+
+    xor al, al
+    mov ah, 40h
+    mov bx, [bp+4]
+    mov bx, [bx]
+    mov cx, [bp+8]
+    mov dx, [bp+6]
+    int 21h
+    
+    pop dx
+    pop cx
+    pop bx
+    pop ax
+    pop bp
+    ret 6
+endp write_file
+;----------------------------------------------------------------
+
+;----------------------------------------------------------------
 proc print_number
     ; [bp+4] number to print [value]
 
@@ -215,14 +312,12 @@ proc interpret
     push cx
     push dx
     push si
-    push di
 
     xor ax, ax
     xor bx, bx
     xor cx, cx
     xor dx, dx
     xor si, si
-    xor di, di
 
     mov si, [bp+4]
     mov cx, [bp+6]
@@ -260,7 +355,6 @@ proc interpret
     loop interpreter_loop
 
     end_interpretation:
-    pop di
     pop si
     pop dx
     pop cx
@@ -269,6 +363,17 @@ proc interpret
     pop bp
     ret 4
 endp interpret
+;----------------------------------------------------------------
+
+
+;----------------------------------------------------------------
+proc compile_o1
+    push bp 
+    mov bp, sp
+
+    pop bp
+    ret
+endp compile_o1
 ;----------------------------------------------------------------
 
 main:
@@ -316,6 +421,7 @@ main_call_interpret:
 
     print_endline
 
+    push FILE_READ_MODE
     push offset error_message
     push offset file_handle
     push offset code_file_path + 2
@@ -354,6 +460,54 @@ main_call_compile:
 
     mov ah, 01h
     int 21h
+
+    print_endline
+
+    mov dx, offset compiled_path_input_message
+    mov ah, 09h
+    int 21h
+
+; get file path of the code file
+    xor al, al
+    mov dx, offset compiled_file_path
+    mov ah, 0Ah
+    int 21h
+
+; replace the last character with an EOF (0)
+    mov si, offset compiled_file_path + 1
+    mov cl, [byte ptr si]
+    xor ch, ch
+    inc cx
+    add si, cx
+    mov al, EOF
+    mov [byte ptr si], al
+
+    print_endline
+
+    push READONLY_FILE
+    push offset error_message
+    push offset compiled_file_handle
+    push offset compiled_file_path + 2
+    call create_file
+
+    push offset compiled_file_handle
+    call close_file
+
+    push FILE_READ_WRITE_MODE
+    push offset error_message
+    push offset compiled_file_handle
+    push offset compiled_file_path + 2
+    call open_file
+
+    push [INITIAL_ASM_CODE_SIZE]
+    push offset INITIAL_ASM_CODE
+    push offset compiled_file_handle
+    call write_file
+
+    push offset compiled_file_handle
+    call close_file
+
+    call compile_o1
 
     print_endline
 
