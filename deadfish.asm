@@ -379,6 +379,7 @@ endp interpret
 
 
 ;----------------------------------------------------------------
+; TODO: implement this function (O1 has no optimizations!)
 proc compile_o1
     push bp 
     mov bp, sp
