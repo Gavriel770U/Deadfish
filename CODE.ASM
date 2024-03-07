@@ -1,8 +1,12 @@
 IDEAL
 MODEL SMALL
 STACK 100h
+DATASEG
+CODESEG
+main:
 
-DATASEG
+exit:
+    mov ax, 4c00h
+    int 21h
 
-CODESEG
-
+END main
