@@ -38,6 +38,8 @@ DATASEG
 
     FILE_PATH_SIZE equ 255
 
+    INITIAL_ASM_CODE db "IDEAL", 10, 13
+
     file_handle dw ?
     compiled_file_handle dw ?
     error_message db 'Error', 10, 13, '$'
@@ -58,7 +60,7 @@ DATASEG
 
     commands_length dw ZERO
 
-    commands db COMMANDS_SIZE dup(INITIAL_COMMAND_SIZE)
+    commands db COMMANDS_SIZE dup (INITIAL_COMMAND_SIZE)
 
 CODESEG
 
@@ -215,7 +217,33 @@ endp read_file
 ;----------------------------------------------------------------
 
 ;----------------------------------------------------------------
+proc write_file
+    ; [bp+4] offset file_handle
+    ; [bp+6] offset buffer
+    ; [bp+8] buffer length [value]
 
+    push bp
+    mov bp, sp
+
+    push ax
+    push bx
+    push cx
+    push dx
+
+    xor al, al
+    mov ah, 40h
+    mov bx, [bp+4]
+    mov cx, [bp+8]
+    mov dx, [bp+6]
+    int 21h
+    
+    pop dx
+    pop cx
+    pop bx
+    pop ax
+    pop bp
+    ret 6
+endp write_file
 ;----------------------------------------------------------------
 
 ;----------------------------------------------------------------
@@ -454,7 +482,21 @@ main_call_compile:
     push offset compiled_file_handle
     push offset compiled_file_path + 2
     call create_file
-        
+
+    push offset compiled_file_handle
+    call close_file
+
+    push FILE_WRITE_MODE
+    push offset error_message
+    push offset compiled_file_handle
+    push offset compiled_file_path + 2
+    call open_file 
+
+    push 7
+    push offset INITIAL_ASM_CODE
+    push offset compiled_file_handle
+    call write_file
+
     push offset compiled_file_handle
     call close_file
 
