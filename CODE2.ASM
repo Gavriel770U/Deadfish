@@ -12,4 +12,4 @@ main:
     mov ax, 4c00h
     int 21h
 
-END main
+END main
