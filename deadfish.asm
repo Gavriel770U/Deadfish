@@ -43,9 +43,12 @@ DATASEG
                         db  "STACK 100h", 10, 13   ; 12 characters
                         db  "DATASEG", 10, 13      ; 9  characters
                         db  "CODESEG", 10, 13      ; 9  characters
-                        db  "main:", 10            ; 6  characters 
+                        db  "main:", 10            ; 6  characters
+                        db  "    mov ax, @data", 10 ; 18 characters
+                        db  "    mov ds, ax",    10 ; 15 characters
+                        db  "    xor ax, ax",    10 ; 15 characters
 
-    INITIAL_ASM_CODE_SIZE dw 6+12+12+9+9+6
+    INITIAL_ASM_CODE_SIZE dw 6+12+12+9+9+6+18+15+15
 
     FINAL_ASM_CODE      db 10, 13, "exit:", 10     ; 8  characters
                         db "    mov ax, 4c00h", 10 ; 18 characters
