@@ -38,22 +38,22 @@ DATASEG
 
     FILE_PATH_SIZE equ 255
 
-    INITIAL_ASM_CODE    db  "IDEAL", 10             ; 6  characters
-                        db  "MODEL SMALL", 10       ; 12 characters
-                        db  "STACK 100h", 10, 13    ; 12 characters
-                        db  "DATASEG", 10           ; 8  characters
-                        db  "CODESEG", 10           ; 8  characters
-                        db  "main:", 10             ; 6  characters
-                        db  "    mov ax, @data", 10 ; 18 characters
-                        db  "    mov ds, ax",    10 ; 15 characters
-                        db  "    xor ax, ax",    10 ; 15 characters
+    INITIAL_ASM_CODE    db  "IDEAL", 10             ; 6     characters
+                        db  "MODEL SMALL", 10       ; 12    characters
+                        db  "STACK 100h", 10, 13    ; 12    characters
+                        db  "DATASEG", 10           ; 8     characters
+                        db  "CODESEG", 10           ; 8     characters
+                        db  "main:", 10             ; 6     characters
+                        db  "    mov ax, @data", 10 ; 18    characters
+                        db  "    mov ds, ax",    10 ; 15    characters
+                        db  "    xor ax, ax",    10 ; 15    characters
 
     INITIAL_ASM_CODE_SIZE dw 6+12+12+8+8+6+18+15+15
 
-    FINAL_ASM_CODE      db 10, 13, "exit:", 10      ; 8  characters
-                        db "    mov ax, 4c00h", 10  ; 18 characters
-                        db "    int 21h", 10        ; 12 characters
-                        db 10, "END main"           ; 9 characters
+    FINAL_ASM_CODE      db 10, 13, "exit:", 10      ; 8     characters
+                        db "    mov ax, 4c00h", 10  ; 18    characters
+                        db "    int 21h", 10        ; 12    characters
+                        db 10, "END main"           ; 9     characters
 
     FINAL_ASM_CODE_SIZE dw 8+18+12+9
 
