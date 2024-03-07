@@ -499,7 +499,7 @@ main_call_compile:
     push offset compiled_file_path + 2
     call open_file
 
-    push INITIAL_ASM_CODE_SIZE
+    push [INITIAL_ASM_CODE_SIZE]
     push offset INITIAL_ASM_CODE
     push offset compiled_file_handle
     call write_file
