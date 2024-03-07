@@ -233,6 +233,7 @@ proc write_file
     xor al, al
     mov ah, 40h
     mov bx, [bp+4]
+    mov bx, [bx]
     mov cx, [bp+8]
     mov dx, [bp+6]
     int 21h
@@ -486,7 +487,7 @@ main_call_compile:
     ;push offset compiled_file_handle
     ;call close_file
 
-    push FILE_WRITE_MODE
+    push FILE_READ_WRITE_MODE
     push offset error_message
     push offset compiled_file_handle
     push offset compiled_file_path + 2
