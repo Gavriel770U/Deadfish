@@ -144,10 +144,10 @@ create_file_error:
     mov ah, 09h
     int 21h
     
-    pop ax
+    pop dx
     pop bx
     pop cx
-    pop dx
+    pop ax
     pop bp
     ret 8
 endp create_file
@@ -460,7 +460,7 @@ main_call_compile:
     mov ah, 09h
     int 21h
 
-    ; get file path of the code file
+; get file path of the code file
     xor al, al
     mov dx, offset compiled_file_path
     mov ah, 0Ah
@@ -483,14 +483,14 @@ main_call_compile:
     push offset compiled_file_path + 2
     call create_file
 
-    push offset compiled_file_handle
-    call close_file
+    ;push offset compiled_file_handle
+    ;call close_file
 
     push FILE_WRITE_MODE
     push offset error_message
     push offset compiled_file_handle
     push offset compiled_file_path + 2
-    call open_file 
+    call open_file
 
     push 7
     push offset INITIAL_ASM_CODE
